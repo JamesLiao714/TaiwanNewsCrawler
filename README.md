@@ -37,7 +37,7 @@ Crawling
 
 ```python
 ## search keywords: covid
-## search first 100 results
+## search first 100 pages results
 ## save the result as udn_covid_100.csv in search_result folder.
 crawler1.search('covid', 100, CSV=True)
 crawler2.search('covid', 100, CSV=True)

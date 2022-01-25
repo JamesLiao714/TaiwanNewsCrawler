@@ -11,5 +11,5 @@ The crawlered media is listed below.
 Media Type|Meida Name (CN)|Media Name (EN)|ID|Abbreviation
 :---:|:---:|:---:|:---:|:---:
 |Print Media|自由時報|Liberty News|0|ltn
-|Print Media|聯合報|UDN News|2|udn
-|Print Media|中國時報|China Times|3|chinatimes
+|Print Media|聯合報|UDN News|1|udn
+|Print Media|中國時報|China Times|2|chinatimes

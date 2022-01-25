@@ -32,9 +32,9 @@ crawler = ltn_crawler()
 ## search first 100 results
 crawler.search('帥哥', 100)
 ```
-## Result
+## Result Example
+Please refer to `Demo.ipynb`
 
-TITLE	TIME	CATEGORY	DESCRIPTION	CONTENT	KEYWORDS	FROM	LINK
 TITLE|TIME	|CATEGORY|DESCRIPTION|CONTENT|KEYWORDS|	FROM|	LINK|
 :---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 北市房仲傳染給新北客戶Ct值19.4 急匡列40人足跡公布|2022-01-25 15:23:00|	udn|國內疫情持續延燒，北市日前出現不明感染源，北市男房仲（案18375）曾帶一名客戶（案1851...|國內疫情持續延燒，北市日前出現不明感染源，北市男房仲（案18375）曾帶一名客戶（案1851...	|新冠肺炎,COVID-19|聯合新聞網|https://udn.com/news/story/120940/6059544

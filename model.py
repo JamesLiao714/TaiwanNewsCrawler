@@ -86,8 +86,10 @@ class chinatimes_crawler:
         print('There are {} News in DataFrame.'.format(len(df)))
         if CSV:
             p = self.save_path + self.company + "_"+ keywords+'_' + str(pages)+'.csv'
+            filepath = Path(p)  
+            filepath.parent.mkdir(parents=True, exist_ok=True) 
             print('SAVING RESULT AT ' +  p)
-            df.to_csv(p, index=False)
+            df.to_csv(filepath, encoding = 'utf_8', index=False)
         return df
 
 class ltn_crawler:
@@ -97,6 +99,7 @@ class ltn_crawler:
         self.headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36'
         }
+        self.save_path = './search_result/'
         
     def GetLinks(self, response):
         links = []
@@ -150,8 +153,11 @@ class ltn_crawler:
         df = pd.concat(list_of_dataframes, ignore_index=True)
         print('There are {} News in DataFrame.'.format(len(df)))
         if CSV:
-            
-            df.to_csv(index=False)
+            p = self.save_path + self.company + "_"+ keywords+'_' + str(pages)+'.csv'
+            filepath = Path(p)  
+            filepath.parent.mkdir(parents=True, exist_ok=True) 
+            print('SAVING RESULT AT ' +  p)
+            df.to_csv(filepath, encoding = 'utf_8', index=False)
         return df
 
 
@@ -162,6 +168,7 @@ class udn_crawler:
         self.headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36'
         }
+        self.save_path = './search_result/'
         
     def GetLinks(self,response):
         links = []
@@ -213,6 +220,10 @@ class udn_crawler:
         df = pd.concat(list_of_dataframes, ignore_index=True)
         print('There are {} News in DataFrame.'.format(len(df)))
         if CSV:
-            df.to_csv(index=False)
+            p = self.save_path + self.company + "_"+ keywords+'_' + str(pages)+'.csv'
+            filepath = Path(p)  
+            filepath.parent.mkdir(parents=True, exist_ok=True) 
+            print('SAVING RESULT AT ' +  p)
+            df.to_csv(filepath, encoding = 'utf_8', index=False)
         return df
     

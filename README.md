@@ -21,7 +21,7 @@ Media Type|Meida Name (CN)|Media Name (EN)|ID|Abbreviation
 - ltn_crawler
 - udn_crawler
 
-Use `search(keywords, pages_num)` to retrieve the dataframe conatining news info within page_num.
+Use `search(keywords, pages_num, CSV)` to retrieve the dataframe conatining news info within page_num. If CSV is set to True (default=False), the searching result will be save automatically as CSV file in the folder called `search_result`.
 
 For example,
 
@@ -30,7 +30,12 @@ For example,
 crawler = udn_crawler()
 ## search keywords: covid
 ## search first 100 results
-crawler.search('covid', 100)
+## save the result as udn_covid_100.csv in search_result folder.
+crawler.search('covid', 100, CSV=True)
+## search keywords: covid
+## search first 100 results
+## Do not save the result as .csv file
+crawler.search('covid', 100, CSV=False)
 ```
 ## Result Example
 Please refer to `Demo.ipynb`

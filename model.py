@@ -72,11 +72,11 @@ class chinatimes_crawler:
 
         # 多線程爬蟲
 
-        responses = [MultiThread_Crawl(link, self.headers) for link in links]
+        responses = [MultiThread_Crawl(link, self.headers) for link in tqdm(links)]
 
         # 整理成DataFrame
         list_of_dataframes = []
-        for response in responses:
+        for response in tqdm(responses):
             try:
                 ndf = self.GetNews(response)
                 list_of_dataframes.append(ndf)
@@ -140,11 +140,11 @@ class ltn_crawler:
 
         # 多線程爬蟲
 
-        responses = [MultiThread_Crawl(link, self.headers) for link in links]
+        responses = [MultiThread_Crawl(link, self.headers) for link in tqdm(links)]
 
         # 整理成DataFrame
         list_of_dataframes = []
-        for response in responses:
+        for response in tqdm(responses):
             try:
                 ndf = self.GetNews(response)
                 list_of_dataframes.append(ndf)
@@ -204,14 +204,14 @@ class udn_crawler:
             links += self.GetLinks(resp)
             links = list(set(links))  
             page_n = len(links)
-            print('There are {} links in page {} | total {}'.format(page_n - prev,str(i), pages))
+            print('There are {} links in page {} | total {}'.format(page_n - prev,str(i), page_n))
             prev = page_n
 
         # 多線程爬蟲
-        responses = [MultiThread_Crawl(link, self.headers) for link in links]
+        responses = [MultiThread_Crawl(link, self.headers) for link in tqdm(links)]
         # 整理成DataFrame
         list_of_dataframes = []
-        for response in responses:
+        for response in tqdm(responses):
             try:
                 ndf = self.GetNews(response)
                 list_of_dataframes.append(ndf)

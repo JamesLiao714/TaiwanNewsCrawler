@@ -33,7 +33,7 @@ def MultiThread_Crawl(url, headers):
 def company_map(name):
     map = {'ltn':'自由時報','udn':'聯合報','chinatimes' : '中國時報'}
     return map[name]
-    
+
 # china times crwler
 class chinatimes_crawler:
     def __init__(self):
@@ -99,7 +99,7 @@ class chinatimes_crawler:
             filepath = Path(p)  
             filepath.parent.mkdir(parents=True, exist_ok=True) 
             print('SAVING RESULT AT ' +  p)
-            df.to_csv(filepath, encoding = 'utf_8', index=False)
+            df.to_csv(filepath, encoding = 'utf_8_sig', index=False)
         return df
 
 class ltn_crawler:
@@ -167,7 +167,7 @@ class ltn_crawler:
             filepath = Path(p)  
             filepath.parent.mkdir(parents=True, exist_ok=True) 
             print('SAVING RESULT AT ' +  p)
-            df.to_csv(filepath, encoding = 'utf_8', index=False)
+            df.to_csv(filepath, encoding = 'utf_8_sig', index=False)
         return df
 
 
@@ -234,6 +234,6 @@ class udn_crawler:
             filepath = Path(p)  
             filepath.parent.mkdir(parents=True, exist_ok=True) 
             print('SAVING RESULT AT ' +  p)
-            df.to_csv(filepath, encoding = 'utf_8', index=False)
+            df.to_csv(filepath, encoding = 'utf_8_sig', index=False)
         return df
     

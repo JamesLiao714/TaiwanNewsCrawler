@@ -26,16 +26,29 @@ Use `search(keywords, pages_num, CSV)` to retrieve the dataframe conatining news
 For example,
 
 ```python
-## Build news crawler
-crawler = udn_crawler()
+## Build udn news crawler 聯合報
+crawler1 = udn_crawler()
+## Build ltn news crawler 自由時報
+crawler2 = ltn_crawler()
+## Build chinatimes news crawler 中時
+crawler3 = chinatimes_crawler()
+```
+Crawling
+
+```python
 ## search keywords: covid
-## search first 100 results
+## search first 100 pages results
 ## save the result as udn_covid_100.csv in search_result folder.
-crawler.search('covid', 100, CSV=True)
+crawler1.search('covid', 100, CSV=True)
+crawler2.search('covid', 100, CSV=True)
+crawler3.search('covid', 100, CSV=True)
+
 ## search keywords: covid
 ## search first 100 results
 ## Do not save the result as .csv file
-crawler.search('covid', 100, CSV=False)
+crawler1.search('covid', 100, CSV=False)
+crawler2.search('covid', 100, CSV=False)
+crawler3.search('covid', 100, CSV=False)
 ```
 ## Result Example
 Please refer to `Demo.ipynb`

@@ -204,7 +204,7 @@ class udn_crawler:
             links += self.GetLinks(resp)
             links = list(set(links))  
             page_n = len(links)
-            print('There are {} links in page {} | total {}'.format(page_n - prev,str(i), page_n))
+            print('There are {} links in page {} | total {}'.format(page_n - prev,str(i), pages))
             prev = page_n
 
         # 多線程爬蟲

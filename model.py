@@ -21,9 +21,19 @@ import requests
 import urllib
 from urllib.parse import urlparse, parse_qs, urlunparse
 import time
-from utils import company_map, MultiThread_Crawl
+#from utils import company_map, MultiThread_Crawl
 from pathlib import Path
 
+def MultiThread_Crawl(url, headers):
+    try:
+        return requests.get(url, headers = headers)
+    except:
+        pass
+
+def company_map(name):
+    map = {'ltn':'自由時報','udn':'聯合報','chinatimes' : '中國時報'}
+    return map[name]
+    
 # china times crwler
 class chinatimes_crawler:
     def __init__(self):

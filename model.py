@@ -2,6 +2,8 @@
 @author: 廖品捷
 @Create Date: 2022/1/25
 """
+from pathlib import Path
+from pickle import FALSE
 import requests
 import json
 from bs4 import BeautifulSoup
@@ -20,6 +22,7 @@ import urllib
 from urllib.parse import urlparse, parse_qs, urlunparse
 import time
 from utils import company_map, MultiThread_Crawl
+from pathlib import Path
 
 # china times crwler
 class chinatimes_crawler:
@@ -29,6 +32,7 @@ class chinatimes_crawler:
         self.headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36'
         }
+        self.save_path = './search_result/'
         
     def GetLinks(self, response):
         links = []
@@ -53,7 +57,7 @@ class chinatimes_crawler:
                            columns = ['TITLE', 'TIME', 'CATEGORY', 'DESCRIPTION', 'CONTENT','KEYWORDS', 'FROM', 'LINK']) 
         return ndf
     
-    def search(self, keywords, pages):
+    def search(self, keywords, pages, CSV = False):
         # crawling
         links = []
         prev = 0
@@ -80,6 +84,10 @@ class chinatimes_crawler:
                 pass
         df = pd.concat(list_of_dataframes, ignore_index=True)
         print('There are {} News in DataFrame.'.format(len(df)))
+        if CSV:
+            p = self.save_path + self.company + "_"+ keywords+'_' + str(pages)+'.csv'
+            print('SAVING RESULT AT ' +  p)
+            df.to_csv(p, index=False)
         return df
 
 class ltn_crawler:
@@ -113,7 +121,7 @@ class ltn_crawler:
                            columns = ['TITLE', 'TIME', 'CATEGORY', 'DESCRIPTION', 'CONTENT','KEYWORDS', 'FROM', 'LINK']) 
         return ndf
     
-    def search(self, keywords, pages):
+    def search(self, keywords, pages, CSV =False):
         # crawling
         # https://search.ltn.com.tw/list?keyword=covid&start_time=20041201&end_time=20220125&sort=date&type=all&page=2
         links = []
@@ -141,6 +149,9 @@ class ltn_crawler:
                 pass
         df = pd.concat(list_of_dataframes, ignore_index=True)
         print('There are {} News in DataFrame.'.format(len(df)))
+        if CSV:
+            
+            df.to_csv(index=False)
         return df
 
 
@@ -175,7 +186,7 @@ class udn_crawler:
         return ndf
     #https://udn.com/search/word/2/{}
    
-    def search(self, keywords, pages):
+    def search(self, keywords, pages, CSV = False):
         # crawling
         # https://udn.com/api/more?page=0&id=search:covid&channelId=2&type=searchword&last_page=28
         links = []
@@ -201,5 +212,7 @@ class udn_crawler:
                 pass
         df = pd.concat(list_of_dataframes, ignore_index=True)
         print('There are {} News in DataFrame.'.format(len(df)))
+        if CSV:
+            df.to_csv(index=False)
         return df
     

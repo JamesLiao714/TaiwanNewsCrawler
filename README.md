@@ -27,10 +27,10 @@ For example,
 
 ```python
 ## Build news crawler
-crawler = ltn_crawler()
-## search keywords: 帥哥
+crawler = udn_crawler()
+## search keywords: covid
 ## search first 100 results
-crawler.search('帥哥', 100)
+crawler.search('covid', 100)
 ```
 ## Result Example
 Please refer to `Demo.ipynb`

@@ -2,40 +2,48 @@
 @author: 廖品捷
 @Create Date: 2022/1/25
 """
+from http.client import MULTI_STATUS
 from pathlib import Path
-from pickle import FALSE
+from tracemalloc import start
 import requests
-import json
 from bs4 import BeautifulSoup
 import pandas as pd
-import re
 from datetime import datetime
-import os
 import threading
-import ssl
-import scrapy
 from tqdm import tqdm
-import re
-import os
 import requests
-import urllib
-from urllib.parse import urlparse, parse_qs, urlunparse
 import time
+import urllib3
+urllib3.disable_warnings()
 #from utils import company_map, MultiThread_Crawl
-from pathlib import Path
 
-def MultiThread_Crawl(url, headers):
+def MultiThread(links, func):
+    try:
+        pipeline = []
+        for url in links:
+            pipeline.append(threading.Thread(target = func, args = (url,))) 
+        for thread in pipeline:
+            thread.start()
+        for thread in pipeline:
+            thread.join()
+    except:
+        print('Errors occur, unable to connect URL links')
+        pass
+
+def singleThread(url, headers):
     try:
         return requests.get(url, headers = headers)
     except:
         pass
 
+
+
 def company_map(name):
     map = {'ltn':'自由時報','udn':'聯合報','chinatimes' : '中國時報'}
     return map[name]
 
-# china times crwler
-class chinatimes_crawler:
+# 中國時報新聞 crawler
+class chinatimes_crawler():
     def __init__(self):
         self.company = 'chinatimes'
         print('Crawler for news company: {}'.format(company_map(self.company)))
@@ -43,19 +51,26 @@ class chinatimes_crawler:
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36'
         }
         self.save_path = './search_result/'
-        
+        self.responses = []
+        self.start = time.time()
+        self.end = time.time()
+
+    def getResponse(self, url):
+        self.responses.append(requests.get(url, headers = self.headers, verify=False))
+
     def GetLinks(self, response):
         links = []
         soup = BeautifulSoup(response.text, features="lxml")
         for i in soup.find_all('h3'):
-            #print(i)
+
             url = i.find('a')['href']
             links.append(url)
         return links
     
     def GetNews(self, response):
         soup = BeautifulSoup(response.text, features="lxml")
-        url = soup.find('link')['href']
+        #url = soup.find('link')['href']
+        
         ndf = pd.DataFrame(data = [{'TITLE':soup.find('h1', attrs={'class':'article-title'}).text,
                                     'TIME':datetime.strptime(soup.find('meta', attrs={'property':'article:published_time'})['content'],'%Y-%m-%dT%H:%M:%S+08:00'),
                                     'CATEGORY':soup.find('meta',attrs={'property':'article:section'})['content'],
@@ -64,13 +79,15 @@ class chinatimes_crawler:
                                     'KEYWORDS':soup.find('meta',{'name':'keywords'})['content'],
                                     'FROM':soup.find('meta',{'name':'publisher'})['content'],
                                     'LINK':soup.find('meta', {'property':'og:url'})['content']}],
-                           columns = ['TITLE', 'TIME', 'CATEGORY', 'DESCRIPTION', 'CONTENT','KEYWORDS', 'FROM', 'LINK']) 
+                        columns = ['TITLE', 'TIME', 'CATEGORY', 'DESCRIPTION', 'CONTENT','KEYWORDS', 'FROM', 'LINK']) 
         return ndf
+
     
     def search(self, keywords, pages, CSV = False):
         # crawling
         links = []
         prev = 0
+        
         for i in range(pages):
             url = 'https://www.chinatimes.com/search/{}?page={}'.format(keywords, i+1)
             resp = requests.get(url)
@@ -79,19 +96,22 @@ class chinatimes_crawler:
             page_n = len(links)
             print('There are {} links in page {} | total {}'.format(page_n - prev,str(i + 1), page_n))
             prev = page_n
-
         # 多線程爬蟲
 
-        responses = [MultiThread_Crawl(link, self.headers) for link in tqdm(links)]
-
+        #self.responses = [requests.get(link, self.headers) for link in tqdm(links)]
+        print('PARSING DATA & LOADING NEWS CONTENT')
+        print('SUPPORT MULTI THREAD')
+        MultiThread(links, self.getResponse)
         # 整理成DataFrame
         list_of_dataframes = []
-        for response in tqdm(responses):
+        for response in tqdm(self.responses):
             try:
                 ndf = self.GetNews(response)
                 list_of_dataframes.append(ndf)
             except:
                 pass
+        self.end = time.time()
+        print('Total time cost: {0:.2f} seconds'.format(self.end - self.start))
         df = pd.concat(list_of_dataframes, ignore_index=True)
         print('There are {} News in DataFrame.'.format(len(df)))
         if CSV:
@@ -102,6 +122,8 @@ class chinatimes_crawler:
             df.to_csv(filepath, encoding = 'utf_8_sig', index=False)
         return df
 
+
+# 自由時報新聞
 class ltn_crawler:
     def __init__(self):
         self.company = 'ltn'
@@ -110,19 +132,24 @@ class ltn_crawler:
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36'
         }
         self.save_path = './search_result/'
-        
+        self.responses = []
+        self.start = time.time()
+        self.end = time.time()
+
+    def getResponse(self, url):
+        self.responses.append(requests.get(url, headers = self.headers, verify=False))
+
     def GetLinks(self, response):
         links = []
         soup = BeautifulSoup(response.text, features="lxml")
         for i in soup.find_all("div", {"class": "cont"}):
-            #print(i)
             url = i['href']
             links.append(url)
         return links
     
     def GetNews(self,response):
         soup = BeautifulSoup(response.text, features="lxml")
-        url = soup.find('link')['href']
+
         ndf = pd.DataFrame(data = [{'TITLE':soup.find('h1').text,
                                     'TIME':datetime.strptime(soup.find('meta', attrs={'property':'article:published_time'})['content'],'%Y-%m-%dT%H:%M:%S+08:00'),
                                     'CATEGORY':soup.find('meta',attrs={'property':'article:section'})['content'],
@@ -149,17 +176,20 @@ class ltn_crawler:
             prev = page_n
 
         # 多線程爬蟲
-
-        responses = [MultiThread_Crawl(link, self.headers) for link in tqdm(links)]
+        print('PARSING DATA & LOADING NEWS CONTENT')
+        print('SUPPORT MULTI THREAD')
+        MultiThread(links, self.getResponse)
 
         # 整理成DataFrame
         list_of_dataframes = []
-        for response in tqdm(responses):
+        for response in tqdm(self.responses):
             try:
                 ndf = self.GetNews(response)
                 list_of_dataframes.append(ndf)
             except:
                 pass
+        self.end = time.time()
+        print('Total time cost: {0:.2f} seconds'.format(self.end - self.start))
         df = pd.concat(list_of_dataframes, ignore_index=True)
         print('There are {} News in DataFrame.'.format(len(df)))
         if CSV:
@@ -179,7 +209,14 @@ class udn_crawler:
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36'
         }
         self.save_path = './search_result/'
-        
+        self.responses = []
+        self.start = time.time()
+        self.end = time.time()
+
+    def getResponse(self, url):
+
+        self.responses.append(requests.get(url, headers = self.headers , verify=False))
+
     def GetLinks(self,response):
         links = []
         respond_dt = response.json()
@@ -190,7 +227,7 @@ class udn_crawler:
     
     def GetNews(self, response):
         soup = BeautifulSoup(response.text, features="lxml")
-        url = soup.find('link')['href']
+        #url = soup.find('link')['href']
         ndf = pd.DataFrame(data = [{'TITLE':soup.find('h1', attrs ={"class":"article-content__title"}).text,
                                     'TIME':datetime.strptime(soup.find('time', attrs={'class':'article-content__time'}).text,'%Y-%m-%d %H:%M'),
                                     'CATEGORY':soup.find('meta',attrs={'property':'article:section'})['content'],
@@ -201,7 +238,6 @@ class udn_crawler:
                                     'LINK':soup.find('meta', {'property':'og:url'})['content']}],
                            columns = ['TITLE', 'TIME', 'CATEGORY', 'DESCRIPTION', 'CONTENT','KEYWORDS', 'FROM', 'LINK']) 
         return ndf
-    #https://udn.com/search/word/2/{}
    
     def search(self, keywords, pages, CSV = False):
         # crawling
@@ -218,15 +254,19 @@ class udn_crawler:
             prev = page_n
 
         # 多線程爬蟲
-        responses = [MultiThread_Crawl(link, self.headers) for link in tqdm(links)]
+        print('PARSING DATA & LOADING NEWS CONTENT')
+        print('DO NOT SUPPORT MULTI THREAD')
+        self.responses = [singleThread(link, self.headers) for link in tqdm(links)]
         # 整理成DataFrame
         list_of_dataframes = []
-        for response in tqdm(responses):
+        for response in tqdm(self.responses):
             try:
                 ndf = self.GetNews(response)
                 list_of_dataframes.append(ndf)
             except:
                 pass
+        self.end = time.time()
+        print('Total time cost: {0:.2f} seconds'.format(self.end - self.start))
         df = pd.concat(list_of_dataframes, ignore_index=True)
         print('There are {} News in DataFrame.'.format(len(df)))
         if CSV:

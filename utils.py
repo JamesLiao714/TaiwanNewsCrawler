@@ -3,25 +3,26 @@
 @Create Date: 2022/1/25
 """
 import requests
-import json
-from bs4 import BeautifulSoup
-import pandas as pd
-import re
 from datetime import datetime
-import os
 import threading
-import ssl
-import scrapy
 from tqdm import tqdm
-import re
-import os
 import requests
-import urllib
-from urllib.parse import urlparse, parse_qs, urlunparse
-import time
 
 
-def MultiThread_Crawl(url, headers):
+def MultiThread(links, func):
+    try:
+        pipeline = []
+        for url in links:
+            pipeline.append(threading.Thread(target = func, args = (url,))) 
+        for thread in pipeline:
+            thread.start()
+        for thread in pipeline:
+            thread.join()
+    except:
+        print('Errors occur, unable to connect URL links')
+        pass
+
+def singleThread(url, headers):
     try:
         return requests.get(url, headers = headers)
     except:

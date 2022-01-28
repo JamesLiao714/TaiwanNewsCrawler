@@ -16,14 +16,17 @@ Media Type|Meida Name (CN)|Media Name (EN)|ID|Abbreviation
 
 ## Usage
 
+**Import Model**
+```python
+from model import chinatimes_crawler, ltn_crawler, udn_crawler
+```
+
 Three crawler in `model.py` for different news company website:
 - chinatimes_crawler 
 - ltn_crawler 
 - udn_crawler 
 
-Use `search(keywords, pages_num, CSV)` to retrieve the dataframe conatining news info within page_num. If CSV is set to True (default=False), the searching result will be save automatically as CSV file in the folder called `search_result`.
-
-For example,
+**Constructor**
 
 ```python
 ## Build udn news crawler 聯合報
@@ -33,7 +36,9 @@ crawler2 = ltn_crawler()
 ## Build chinatimes news crawler 中時
 crawler3 = chinatimes_crawler()
 ```
-Crawling
+**Crawling**
+
+Use `search(keywords, pages_num, CSV)` to retrieve the dataframe conatining news info within page_num. If CSV is set to True (default=False), the searching result will be save automatically as CSV file in the folder called `search_result`.
 
 ```python
 ## search keywords: covid

@@ -13,6 +13,7 @@ import threading
 from tqdm import tqdm
 import requests
 import time
+import sys
 import urllib3
 urllib3.disable_warnings()
 #from utils import company_map, MultiThread_Crawl
@@ -54,6 +55,7 @@ class chinatimes_crawler():
         self.responses = []
         self.start = time.time()
         self.end = time.time()
+        self.MT = True
 
     def getResponse(self, url):
         self.responses.append(requests.get(url, headers = self.headers, verify=False))
@@ -100,8 +102,13 @@ class chinatimes_crawler():
 
         #self.responses = [requests.get(link, self.headers) for link in tqdm(links)]
         print('PARSING DATA & LOADING NEWS CONTENT')
-        print('SUPPORT MULTI THREAD')
-        MultiThread(links, self.getResponse)
+        print('SUPPORT MULTI THREAD, BUT IT MAY LOSE SOME NEWS')
+
+        if not self.MT:
+            self.responses = [singleThread(link, self.headers) for link in tqdm(links)]
+        else:
+            MultiThread(links, self.getResponse)
+
         # 整理成DataFrame
         list_of_dataframes = []
         for response in tqdm(self.responses):
@@ -109,6 +116,7 @@ class chinatimes_crawler():
                 ndf = self.GetNews(response)
                 list_of_dataframes.append(ndf)
             except:
+                
                 pass
         self.end = time.time()
         print('Total time cost: {0:.2f} seconds'.format(self.end - self.start))
@@ -135,6 +143,7 @@ class ltn_crawler:
         self.responses = []
         self.start = time.time()
         self.end = time.time()
+        self.MT = True
 
     def getResponse(self, url):
         self.responses.append(requests.get(url, headers = self.headers, verify=False))
@@ -149,8 +158,7 @@ class ltn_crawler:
     
     def GetNews(self,response):
         soup = BeautifulSoup(response.text, features="lxml")
-
-        ndf = pd.DataFrame(data = [{'TITLE':soup.find('h1').text,
+        ndf = pd.DataFrame(data = [{'TITLE':soup.find('meta',attrs={'property':'og:title'})['content'],
                                     'TIME':datetime.strptime(soup.find('meta', attrs={'property':'article:published_time'})['content'],'%Y-%m-%dT%H:%M:%S+08:00'),
                                     'CATEGORY':soup.find('meta',attrs={'property':'article:section'})['content'],
                                     'DESCRIPTION':soup.find('meta',attrs={'name':'description'})['content'],
@@ -160,7 +168,30 @@ class ltn_crawler:
                                     'LINK':soup.find('meta', {'property':'og:url'})['content']}],
                            columns = ['TITLE', 'TIME', 'CATEGORY', 'DESCRIPTION', 'CONTENT','KEYWORDS', 'FROM', 'LINK']) 
         return ndf
-    
+    '''
+    def search_dt(self,keyword, dt_beg, dt_end, CSV = False):
+        
+        links = []
+        i = 0
+        page_n = 0
+        while 1:
+            try:
+                url = 'https://search.ltn.com.tw/list?keyword={}&start_time={}&end_time={}&page={}'.format(keyword, dt_beg, dt_end, i)
+                resp = requests.get(url)
+                links += self.GetLinks(resp)
+                links = list(set(links)) 
+                print(len(links), page_n)
+                if len(links) == page_n:
+                    break 
+                page_n = len(links)
+                print('Current page: {} | News number: {} | Date : {} - {}'.format(i+1,page_n, dt_beg, dt_end))
+                i+=1
+            except:
+                print(sys.exc_info()[0])
+                break
+        '''
+
+
     def search(self, keywords, pages, CSV =False):
         # crawling
         # https://search.ltn.com.tw/list?keyword=covid&start_time=20041201&end_time=20220125&sort=date&type=all&page=2
@@ -177,8 +208,12 @@ class ltn_crawler:
 
         # 多線程爬蟲
         print('PARSING DATA & LOADING NEWS CONTENT')
-        print('SUPPORT MULTI THREAD')
-        MultiThread(links, self.getResponse)
+        if not self.MT:
+            self.responses = [singleThread(link, self.headers) for link in tqdm(links)]
+        else:
+            print('SUPPORT MULTI THREAD')
+            MultiThread(links, self.getResponse)
+
 
         # 整理成DataFrame
         list_of_dataframes = []
